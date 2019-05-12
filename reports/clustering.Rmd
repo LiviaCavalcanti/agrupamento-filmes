@@ -1,5 +1,5 @@
 ---
-title: "Os Três lados de Meryl Streep"
+title: "Os 3 lados de Meryl Streep"
 output:
     html_document:
     df_print: paged
@@ -28,7 +28,7 @@ knitr::opts_chunk$set(tidy = FALSE,
 ```{r echo=FALSE}
 ## ANTES DE USAR
 # Para criar data/movies.csv
-import_data("meryl_streep") # ou com o ator/atriz que você escolher
+#import_data("meryl_streep") # ou com o ator/atriz que você escolher
 ```
 Vamos dar uma olhada nos filmes da atriz americana Meryl Streep para entender o perfil de seus trabalhos.
 
@@ -43,47 +43,8 @@ filmes_streep %>%
     ggplot(aes(x = avaliacao, y = bilheteria)) + 
     geom_point(size = 4) 
 ```
-```{r}
-filmes_ben %>% 
-    ggplot(aes(x = avaliacao, y = bilheteria)) + 
-    geom_point(size = 4) 
-```
+
 Vendo a distribuição dos dados e testando, visualmente, agrupamentos, notamos que a divisão entre três grupos é satisfatória. Vemos um grupo de filmes maus de crítica e maus/bons de bilheteria; muito bons  de crítica e maus/bons de bilheteria; e os sucessos de público e de bilheteria. Como exemplos de cada grupo podemos elencar os com maior bilheteria de cada, e talvez por isso mais conhecidos: The Giver, The Manchurian Candidate, Mamma Mia!
-
-```{r}
-m = filmes_ben %>% select(avaliacao, bilheteria) %>% as.matrix() 
-km = kmeans(m, 2, nstart = 15)%>% 
-        augment(filmes_ben) %>% 
-        mutate(.cluster = as.character(.cluster))
-```
-
-```{r}
-km%>% 
-    ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 10)  + 
-    geom_quasirandom(width = .5) +
-    scale_y_log10()
-
-```
-
-```{r}
-filme_normalizado = filmes_streep %>% 
-    mutate(bilheteria_normalizada = as.vector(scale(log10(bilheteria))), 
-           avaliacao_normalizada = as.vector(scale(avaliacao))) 
-```
-
-
-```{r}
-m2 = filme_normalizado %>% select(avaliacao_normalizada, bilheteria_normalizada) %>% as.matrix() 
-km2 = kmeans(m2, 3, nstart = 15)%>% 
-        augment(filmes_streep) %>% 
-        mutate(.cluster = as.character(.cluster))
-
-km2%>% 
-    ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 10)  + 
-    geom_quasirandom(width = .5) +
-    scale_y_log10()
-
-```
 
 
 ```{r}
@@ -97,3 +58,23 @@ km_streep %>%
     geom_quasirandom(width = .5)
 
 ```
+
+A utilização de z-score como forma de normalizar os dados para realizar o agrupamento melhorou os resultados, apesar de, anteriormente, os grupos já estarem satisfatórios sob a informal análise visual e, de fato, permanecerem semelhantes.
+```{r}
+filme_normalizado = filmes_streep %>% 
+    mutate(bilheteria_normalizada = as.vector(scale(log10(bilheteria))), 
+           avaliacao_normalizada = as.vector(scale(avaliacao))) 
+
+m2 = filme_normalizado %>% select(avaliacao_normalizada, bilheteria_normalizada) %>% as.matrix() 
+km2 = kmeans(m2, 3, nstart = 15)%>% 
+        augment(filmes_streep) %>% 
+        mutate(.cluster = as.character(.cluster))
+
+km2%>% 
+    ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 10)  + 
+    geom_quasirandom(width = .5) +
+    scale_y_log10()
+
+```
+
+

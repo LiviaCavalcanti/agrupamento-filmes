@@ -14,6 +14,8 @@ library(plotly)
 library(ggdendro)
 library(ggbeeswarm)
 library(broom)
+library(factoextra)
+set.seed(123)
 
 source(here::here("code/lib.R"))
 theme_set(theme_report())
@@ -41,7 +43,7 @@ Essa variação ambém revela na sua distribuição no gráfico dos dados.
 ```{r}
 filmes_streep %>% 
     ggplot(aes(x = avaliacao, y = bilheteria)) + 
-    geom_point(size = 4) 
+    geom_point(size = 4, color="#900C3F") 
 ```
 
 Vendo a distribuição dos dados e testando, visualmente, agrupamentos, notamos que a divisão entre três grupos é satisfatória. Vemos um grupo de filmes maus de crítica e maus/bons de bilheteria; muito bons  de crítica e maus/bons de bilheteria; e os sucessos de público e de bilheteria. Como exemplos de cada grupo podemos elencar os com maior bilheteria de cada, e talvez por isso mais conhecidos: The Giver, The Manchurian Candidate, Mamma Mia!
@@ -54,8 +56,9 @@ km_streep = kmeans(m2, 3, nstart = 15)%>%
         mutate(.cluster = as.character(.cluster))
 
 km_streep %>% 
-    ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 10)  + 
-    geom_quasirandom(width = .5)
+    ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 100)  + 
+    geom_quasirandom(width = 50) +
+    labs(title="Agrupando os dados crus", x="Avaliação", y="Bilheteria", color="Grupos")
 
 ```
 
@@ -73,8 +76,16 @@ km2 = kmeans(m2, 3, nstart = 15)%>%
 km2%>% 
     ggplot(aes(x = avaliacao, y = bilheteria, color = .cluster), size = 10)  + 
     geom_quasirandom(width = .5) +
-    scale_y_log10()
+    scale_y_log10() +
+    labs(title="Agrupando os dados Normalizados", x="Avaliação Z-Norm", y="Bilheteria Z-Norm", color="Grupos")
 
 ```
 
+Também é possível ver como os dados normalizados se dispõem em relação uns aos outros. 
+
+```{r}
+km3 = kmeans(m2, 3, nstart = 15)
+fviz_cluster(km3, m2, ellipse.type = "norm") +
+    labs(title="Visualizando grupos dos dados normalizados ", x="Avaliação Z-Norm", y="Bilheteria Z-Norm")
+```
 
